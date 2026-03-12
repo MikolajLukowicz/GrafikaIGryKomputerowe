@@ -47,6 +47,9 @@
         return "rgb(" + r + "," + g + "," + b + ")";
     }
 
+    function doClear() {
+        graphics.clearRect(0,0,canvas.width,canvas.height);
+    }
 
     /**
      * This function is called in init() to set up mouse event handling
@@ -86,6 +89,7 @@
             }
             colorChoice = Number(document.getElementById("colorChoice").value);
             shapeChoice = Number(document.getElementById("shapeChoice").value);
+            document.getElementById("clearButton").onclick = doClear;
             // TODO: Anything else to do when mouse is first pressed?
         }
         
@@ -163,8 +167,11 @@
          }
          
          canvas.addEventListener("mousedown", doMouseDown, false);
-
-   } // end installMouseHandler
+   } 
+  
+   
+        
+   // end installMouseHandler
 
 
    /**
@@ -301,6 +308,10 @@
         <option value="0"selected="selected">Square</option>
         <option value="1">Dodecagon</option>
     </select>
+</p>
+
+<p><b>Clearbutton:</b>
+    <button id="clearButton">Clear</button>
 </p>
 
 <div id="canvasholder">
