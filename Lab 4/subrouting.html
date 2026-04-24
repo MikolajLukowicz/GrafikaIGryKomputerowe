@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SVG subrouting</title>
+    <style>
+        body { margin: 0; display: flex; justify-content: center; background: #f0f0f0; }
+        canvas { background: white; border: 1px solid #ccc; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <canvas id="canvasA" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvasA');
+        const ctx = canvas.getContext('2d');
+        let angle = 0;
+
+        function drawDodecagon(size) {
+            ctx.beginPath();
+            for (let i = 0; i < 12; i++) {
+                const a = (Math.PI / 6) * i;
+                const x = size * Math.cos(a + angle);
+                const y = size * Math.sin(a + angle);
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        function drawArm(length, color) {
+            ctx.strokeStyle = "black";
+            ctx.fillStyle = "red";
+            // Rysowanie ramienia (prostokąt)
+            ctx.fillRect(-length / 2, -5, length, 10);
+            
+            
+            ctx.save();
+            ctx.translate(-length / 2, 0);
+            drawDodecagon(50);
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(length / 2, 0);
+            drawDodecagon(50);
+            ctx.restore();
+        }
+
+        function drawObject(x, y, color, rotation, armLength) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Podstawa (trójkąt)
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(0, 0); ctx.lineTo(-35, 130); ctx.lineTo(35, 130);
+            ctx.fill();
+
+            // Pozycjonowanie i rysowanie ramienia
+            ctx.rotate(rotation * Math.PI / 180);
+            drawArm(armLength);
+            
+            ctx.restore();
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            angle += 0.04; // Prędkość obrotu wielokątów
+
+            drawObject(250, 150, "purple", 20, 220);
+            drawObject(550, 180, "green", -15, 180);
+            drawObject(400, 400, "blue", 10, 280);
+
+            requestAnimationFrame(render);
+        }
+        render();
+    </script>
+</body>
+</html>

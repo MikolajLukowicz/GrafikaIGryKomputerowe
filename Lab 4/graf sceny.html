@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SVG graf sceny</title>
+    <style>
+        body { margin: 0; display: flex; justify-content: center; background: #f0f0f0; }
+        canvas { background: white; border: 1px solid #ccc; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <canvas id="canvasB" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvasB');
+        const ctx = canvas.getContext('2d');
+
+        class Node {
+            constructor(drawFn = null) {
+                this.children = [];
+                this.x = 0; this.y = 0;
+                this.rotation = 0;
+                this.drawFn = drawFn;
+            }
+            add(child) { this.children.push(child); }
+            update(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                if (this.drawFn) this.drawFn(ctx);
+                for (let child of this.children) child.update(ctx);
+                ctx.restore();
+            }
+        }
+
+        function createDodecagon(size) {
+            return new Node((ctx) => {
+                ctx.beginPath();
+                for (let i = 0; i < 12; i++) {
+                    const a = (Math.PI / 6) * i;
+                    ctx.lineTo(size * Math.cos(a), size * Math.sin(a));
+                }
+                ctx.closePath(); ctx.stroke();
+            });
+        }
+
+        // Budowa grafu sceny
+        const root = new Node();
+
+        function buildSystem(x, y, color, armRot, armLen) {
+            const base = new Node((ctx) => {
+                ctx.fillStyle = color;
+                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-35, 120); ctx.lineTo(35, 120); ctx.fill();
+            });
+            base.x = x; base.y = y;
+
+            const arm = new Node((ctx) => {
+                ctx.fillStyle = "red";
+                ctx.fillRect(-armLen/2, -5, armLen, 10);
+            });
+            arm.rotation = armRot * Math.PI / 180;
+
+            const polyLeft = createDodecagon(40);
+            polyLeft.x = -armLen/2;
+
+            const polyRight = createDodecagon(40);
+            polyRight.x = armLen/2;
+
+            arm.add(polyLeft);
+            arm.add(polyRight);
+            base.add(arm);
+            root.add(base);
+
+            return { polyLeft, polyRight };
+        }
+
+        const s1 = buildSystem(250, 150, "purple", 20, 220);
+        const s2 = buildSystem(550, 180, "green", -15, 180);
+        const s3 = buildSystem(400, 400, "blue", 10, 280);
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Animujemy tylko liście grafu (wielokąty)
+            [s1, s2, s3].forEach(s => {
+                s.polyLeft.rotation += 0.05;
+                s.polyRight.rotation += 0.05;
+            });
+
+            root.update(ctx);
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
